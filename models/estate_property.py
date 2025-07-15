@@ -114,3 +114,8 @@ class EstateProperty(models.Model):
                         break
                     else:
                         row.buyer = None
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_new_or_cancelled(self):
+        if any(row.state not in ['new', 'cancelled'] for row in self):
+            raise exceptions.UserError("Only 'New' or 'Cancelled' properties may be deleted.")

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import pdb
+
 from odoo import api, fields, models, exceptions
 from odoo.tools import date_utils
 
@@ -74,3 +76,12 @@ class EstatePropertyOffer(models.Model):
             else:
                 raise exceptions.UserError('The property is not active, the offer cannot be changed')
         return True
+
+    @api.model
+    def create(self, vals):
+        property_id = self.env['estate.property'].browse(vals['property_id'])
+        highest_offer = max([offer_id.price for offer_id in property_id.offer_ids], default=0.0)
+        if vals['price'] < highest_offer:
+            raise exceptions.ValidationError(f'There is a higher offer of {highest_offer}')
+        property_id.state = 'offer_received'
+        return super().create(vals)
