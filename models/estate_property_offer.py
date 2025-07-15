@@ -8,7 +8,9 @@ class EstatePropertyOffer(models.Model):
     _description = 'Offer made on a property'
     _order = 'price desc'
 
+    # -- Standard fields --
     price = fields.Float()
+    validity = fields.Integer(default=7)
     status = fields.Selection(
         copy=False,
         string='Status',
@@ -18,10 +20,13 @@ class EstatePropertyOffer(models.Model):
         ]
     )
 
+    # -- Relationship fields --
+    # TODO: I first tried fields.Char but got a field type mismatch, used Many2one in place. Research this further...
+    property_type_id = fields.Many2one(related='property_id.property_type_id', store=True)
     partner_id = fields.Many2one('res.partner', string='Buyer', required=True)
     property_id = fields.Many2one('estate.property', string='Property', required=True)
 
-    validity = fields.Integer(default=7)
+    # -- Compute fields --
     date_deadline = fields.Date(compute='_compute_date_deadline', inverse='_inverse_date_deadline', store=True)
 
     _sql_constraints = [

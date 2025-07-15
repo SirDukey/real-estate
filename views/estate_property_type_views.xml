@@ -22,6 +22,8 @@
         <field name="model">estate.property.type</field>
         <field name="arch" type="xml">
             <form>
+                <button type="action" class="oe_stat_button" name="%(real-estate.estate_model_offer_action)d" string="Offers" icon="fa-money" />
+                <field name="offer_count" />
                 <field name="property_ids">
                     <list>
                         <field name="name" />

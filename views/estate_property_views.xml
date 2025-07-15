@@ -22,16 +22,12 @@
                         string="Available"
                         name="state"
                         domain="['|', ('state', '=', 'new'), ('state', '=', 'offer_received')]"
+                        help="Only show properties which are available for offers."
                 />
                 <filter
                         string="Archived"
                         name="is_active"
                         domain="[('is_active', '=', False)]"
-                />
-                <filter
-                        string="Cancelled"
-                        name="state"
-                        domain="[('state', '=' , 'cancelled')]"
                 />
                 <group expand="1" string="Group By">
                     <filter
@@ -43,6 +39,11 @@
                             string="Property Type"
                             name="property_type_id"
                             context="{'group_by':'property_type_id'}"
+                    />
+                    <filter
+                            string="Salesman"
+                            name="user_id"
+                            context="{'group_by': 'user_id'}"
                     />
                 </group>
             </search>
@@ -122,7 +123,7 @@
                         </page>
                         <page string="Other Info">
                             <group>
-                                <field name="user_id" />
+                                <field name="user_id" readonly="state in ['offer_accepted', 'sold', 'cancelled']" />
                                 <field name="buyer" />
                             </group>
                         </page>

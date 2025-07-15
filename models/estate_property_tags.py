@@ -7,6 +7,7 @@ class EstatePropertyTags(models.Model):
     _description = 'A tag which can be added to a property'
     _order = 'name'
 
+    # -- Standard fields --
     name = fields.Char(required=True)
     color = fields.Integer()
 

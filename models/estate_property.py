@@ -7,25 +7,25 @@ class EstateProperty(models.Model):
     _description = 'A table of properties'
     _order = 'id desc'
 
+    # -- Standard fields --
     name = fields.Char(required=True)
     description = fields.Text()
     postcode = fields.Char()
     date_availability = fields.Date(copy=False, default=fields.Date.add(fields.Date.today(), months=3))
     expected_price = fields.Float(required=True)
     expected_price_percentage = fields.Integer(default=90)
-    selling_price = fields.Float(readonly=False, compute='_compute_selling_price', default=0.0)
     buyer = fields.Char(readonly=True, copy=False)
     bedrooms = fields.Integer(default=2)
     living_area = fields.Integer(string='Living Area (sqm)')
     garage = fields.Boolean()
     garden = fields.Boolean()
     garden_area = fields.Integer(string='Garden Area (sqm)')
+    is_active = fields.Boolean(active=True, copy=False)
     garden_orientation = fields.Selection(
         string='Garden Orientation',
         selection=[('north', 'North'), ('south', 'South'), ('east', 'East'), ('west', 'West')],
         help='The placement of the garden in relation to the property.'
     )
-    is_active = fields.Boolean(active=True, copy=False)
     state = fields.Selection(
         copy=False,
         default='new',
@@ -40,6 +40,7 @@ class EstateProperty(models.Model):
         ]
     )
 
+    # -- Relationship fields --
     property_type_id = fields.Many2one('estate.property.type', string='Property Type')
     partner_id = fields.Many2one('res.partner', string='Buyer', copy=False)
     user_id = fields.Many2one('res.users', string='Salesman', index=True, tracking=True,
@@ -47,6 +48,8 @@ class EstateProperty(models.Model):
     tag_ids = fields.Many2many('estate.property.tags')
     offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Offers')
 
+    # -- Compute fields --
+    selling_price = fields.Float(readonly=False, compute='_compute_selling_price', default=0.0)
     total_area = fields.Integer(compute='_compute_total_area', string='Total Area (sqm)')
     best_offer = fields.Float(compute='_compute_best_offer')
 
