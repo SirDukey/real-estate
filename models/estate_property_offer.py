@@ -6,6 +6,7 @@ from odoo.tools import date_utils
 class EstatePropertyOffer(models.Model):
     _name = 'estate.property.offer'
     _description = 'Offer made on a property'
+    _order = 'price desc'
 
     price = fields.Float()
     status = fields.Selection(
