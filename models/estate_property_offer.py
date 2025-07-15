@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import pdb
-
 from odoo import api, fields, models, exceptions
 from odoo.tools import date_utils
 
