@@ -41,9 +41,9 @@
                             context="{'group_by':'property_type_id'}"
                     />
                     <filter
-                            string="Salesman"
-                            name="user_id"
-                            context="{'group_by': 'user_id'}"
+                            string="Salesperson"
+                            name="salesperson_id"
+                            context="{'group_by': 'salesperson_id'}"
                     />
                 </group>
             </search>
@@ -131,7 +131,7 @@
                         </page>
                         <page string="Other Info">
                             <group>
-                                <field name="user_id" readonly="state in ['offer_accepted', 'sold', 'cancelled']" />
+                                <field name="salesperson_id" readonly="state in ['offer_accepted', 'sold', 'cancelled']" />
                                 <field name="buyer" />
                             </group>
                         </page>
