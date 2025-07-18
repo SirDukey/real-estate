@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, exceptions
+from odoo import api, exceptions, fields, models
 
 
 class EstateProperty(models.Model):
@@ -53,23 +53,29 @@ class EstateProperty(models.Model):
     total_area = fields.Integer(compute='_compute_total_area', string='Total Area (sqm)')
     best_offer = fields.Float(compute='_compute_best_offer')
 
+    # -- Constraints --
     _sql_constraints = [
         ('check_property_expected_price', 'CHECK(expected_price >= 0)', 'Expected price cannot be negative.'),
-        ('check_property_selling_price', 'CHECK(selling_price >= 0)', 'Selling price cannot be negative.')
     ]
+
+    @api.constrains('selling_price')
+    def _check_selling_price(self):
+        for record in self:
+            if record.selling_price < 0.0:
+                raise exceptions.ValidationError("Selling price cannot be negative")
 
     @api.depends('living_area', 'garden_area')
     def _compute_total_area(self):
-        for row in self:
-            if row.garden:
-                row.total_area = row.garden_area + row.living_area
+        for record in self:
+            if record.garden:
+                record.total_area = record.garden_area + record.living_area
             else:
-                row.total_area = row.living_area
+                record.total_area = record.living_area
 
     @api.depends('offer_ids.price')
     def _compute_best_offer(self):
-        for row in self:
-            row.best_offer = max(row.offer_ids.mapped('price'), default=0.0)
+        for record in self:
+            record.best_offer = max(record.offer_ids.mapped('price'), default=0.0)
 
     @api.onchange('garden')
     def _onchange_garden(self):
@@ -81,41 +87,41 @@ class EstateProperty(models.Model):
             self.garden_orientation = None
 
     def action_property_sold(self):
-        for row in self:
-            if row.state == 'cancelled':
+        for record in self:
+            if record.state == 'cancelled':
                 raise exceptions.UserError('This property is cancelled and cannot be sold.')
-            elif row.state in ['new', 'offer_received']:
+            elif record.state in ['new', 'offer_received']:
                 raise exceptions.UserError('An offer has not been accepted.')
-            elif not row.is_active:
+            elif not record.is_active:
                 raise exceptions.UserError('This is property is not active.')
             else:
-                row.state = 'sold'
-                row.is_active = False
+                record.state = 'sold'
+                record.is_active = False
         return True
 
     def action_property_cancelled(self):
-        for row in self:
-            if row.state == 'sold':
+        for record in self:
+            if record.state == 'sold':
                 raise exceptions.UserError('This property has been sold and cannot be cancelled.')
             else:
-                row.state = 'cancelled'
-                row.is_active = False
-                row.buyer = None
+                record.state = 'cancelled'
+                record.is_active = False
+                record.buyer = None
         return True
 
     @api.depends('offer_ids')
     def _compute_selling_price(self):
-        for row in self:
-            if row.offer_ids and row.state != 'cancelled':
-                for offer in row.offer_ids:
+        for record in self:
+            if record.offer_ids and record.state != 'cancelled':
+                for offer in record.offer_ids:
                     if offer.status == 'accepted':
-                        row.selling_price = offer.price
-                        row.buyer = offer.partner_id.name
+                        record.selling_price = offer.price
+                        record.buyer = offer.partner_id.name
                         break
                     else:
-                        row.buyer = None
+                        record.buyer = None
 
     @api.ondelete(at_uninstall=False)
     def _unlink_if_new_or_cancelled(self):
-        if any(row.state not in ['new', 'cancelled'] for row in self):
+        if any(record.state not in ['new', 'cancelled'] for record in self):
             raise exceptions.UserError("Only 'New' or 'Cancelled' properties may be deleted.")

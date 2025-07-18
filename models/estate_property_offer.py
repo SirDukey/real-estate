@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, exceptions
+from odoo import api, exceptions, fields, models
 from odoo.tools import date_utils
 
 
@@ -21,7 +21,6 @@ class EstatePropertyOffer(models.Model):
     )
 
     # -- Relationship fields --
-    # TODO: I first tried fields.Char but got a field type mismatch, used Many2one in place. Research this further...
     property_type_id = fields.Many2one(related='property_id.property_type_id', store=True)
     partner_id = fields.Many2one('res.partner', string='Buyer', required=True)
     property_id = fields.Many2one('estate.property', string='Property', required=True)
@@ -35,41 +34,41 @@ class EstatePropertyOffer(models.Model):
 
     @api.depends('validity')
     def _compute_date_deadline(self):
-        for row in self:
-            if row.create_date:
-                row.date_deadline = date_utils.add(fields.Date.to_date(row.create_date), days=row.validity)
+        for record in self:
+            if record.create_date:
+                record.date_deadline = date_utils.add(fields.Date.to_date(record.create_date), days=record.validity)
             else:
-                row.date_deadline = date_utils.add(fields.Date.today(), days=row.validity)
+                record.date_deadline = date_utils.add(fields.Date.today(), days=record.validity)
 
     def _inverse_date_deadline(self):
-        for row in self:
-            if row.date_deadline:
-                row.validity = (row.date_deadline - fields.Date.to_date(row.create_date)).days
+        for record in self:
+            if record.date_deadline:
+                record.validity = (record.date_deadline - fields.Date.to_date(record.create_date)).days
             else:
-                row.validity = 7
+                record.validity = 7
 
     def action_property_offer_accept(self):
-        for row in self:
-            minimum_expected_selling_price = row.property_id.expected_price * row.property_id.expected_price_percentage / 100
-            if not row.property_id.is_active:
+        for record in self:
+            minimum_expected_selling_price = record.property_id.expected_price * record.property_id.expected_price_percentage / 100
+            if not record.property_id.is_active:
                 raise exceptions.UserError('The property is not active, the offer cannot be changed')
-            elif row.property_id.state == 'offer_accepted':
+            elif record.property_id.state == 'offer_accepted':
                 raise exceptions.UserError('An offer has already been accepted')
-            elif row.property_id.state == 'sold':
+            elif record.property_id.state == 'sold':
                 raise exceptions.UserError('The property has been sold, the offer cannot be changed')
-            elif row.price < minimum_expected_selling_price:
+            elif record.price < minimum_expected_selling_price:
                 raise exceptions.ValidationError(f'The offer is below the minimum expected price of {minimum_expected_selling_price}.')
             else:
-                row.status = 'accepted'
-                row.property_id.state = 'offer_accepted'
+                record.status = 'accepted'
+                record.property_id.state = 'offer_accepted'
         return True
 
     def action_property_offer_refuse(self):
-        for row in self:
-            if row.property_id.is_active and row.property_id.state != 'sold':
-                row.status = 'refused'
-                row.property_id.state = 'offer_received'
-            elif row.property_id.state == 'sold':
+        for record in self:
+            if record.property_id.is_active and record.property_id.state != 'sold':
+                record.status = 'refused'
+                record.property_id.state = 'offer_received'
+            elif record.property_id.state == 'sold':
                 raise exceptions.UserError('The property has been sold, the offer cannot be changed')
             else:
                 raise exceptions.UserError('The property is not active, the offer cannot be changed')
