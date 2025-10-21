@@ -58,3 +58,16 @@ json file to get a configuration started.  Also, don't forget to set the interpr
             }
         ]
     }
+
+### Docker
+I use docker to host the database and nginx as a reverse proxy, there is a docker compose file
+which requires a `.env` file for the database credentials, create this file then run the following:
+
+`docker compose up -d`
+
+This will start up the two containers and you can access the frontend via http://localhost
+
+### DB init
+Initialize a database with the base module when first:
+
+`python odoo/odoo-bin -d $ODOO_DB --db_host $ODOO_HOST -r $ODOO_USER -w $ODOO_PASS -i base`
