@@ -65,9 +65,9 @@ which requires a `.env` file for the database credentials, create this file then
 
 `docker compose up -d`
 
-This will start up the two containers and you can access the frontend via http://localhost
+This will start up the two containers, access the frontend via http://localhost
 
 ### DB init
-Initialize a database with the base module when first:
+Initialize a database with the base module:
 
 `python odoo/odoo-bin -d $ODOO_DB --db_host $ODOO_HOST -r $ODOO_USER -w $ODOO_PASS -i base`
